@@ -19,6 +19,6 @@ Placeholder
 
 Placeholder
 
-## Changelog:
+## CHANGELOG:
 
 Placeholder
