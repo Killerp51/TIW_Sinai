@@ -1,7 +1,7 @@
 # THIS IS WAR (TIW) SINAI v0.1
 This is War - DCS Dynamic Capture and Advance Mission
 
-Created by Mustang (457 vFS)
+Created by Mustang (457 vFS), Wampa (457th vFS)
 
 ## FEATURES:
 
