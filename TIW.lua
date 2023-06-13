@@ -6,14 +6,24 @@
 -- ******************************
 
 -- **********************************************************************************************************************************************************************************************************************************************************************
+-- BEGIN Scoring/Economy
+-- **********************************************************************************************************************************************************************************************************************************************************************
+
+-- **********************************************************************************************************************************************************************************************************************************************************************
+-- END Scoring/Economy
+-- **********************************************************************************************************************************************************************************************************************************************************************
+
+-- **********************************************************************************************************************************************************************************************************************************************************************
 -- BEGIN CTLD
 -- **********************************************************************************************************************************************************************************************************************************************************************
 
--- Instantiate and start a CTLD for the blue side, using helicopter groups named "Helicargo" and alias "Helicargo"
+-- List of aircraft/helicopters for CTLD
 ctldList = {
    "1a. Tel Nof ↔ C-130J",
    "1a. Tel Nof ↔ UH-1H",
 }
+
+-- Instantiate and start a CTLD for the blue side, using helicopter groups named "Helicargo" and alias "Helicargo" (NOTE: These don't match the naming convention used in the mission, therefore ctldList was added)
 local my_ctld = CTLD:New(coalition.side.BLUE,{"Helicargo", "MEDEVAC", "UH-60L", "UH-1H", "Hercules", "C-130J", "CARGO"}, ctldList )
 my_ctld:__Start(5)
 my_ctld:__Load(10)
@@ -210,28 +220,30 @@ my_ctld.useprecisecoordloads = true -- Instead if slightly varyiing the group po
 -- BEGIN ZONE CAPTURE SCRIPT
 -- **********************************************************************************************************************************************************************************************************************************************************************
 
-	-- List of capturable zones
-	SdeDovCapture = ZONE:New("Sde Dov")
-	BenGurionCapture = ZONE:New("Ben-Gurion")
-	TelNofCapture = ZONE:New("Tel Nof")
-   PalmahimCapture = ZONE:New("Palmahim")
-   HatzorCapture = ZONE:New("Hatzor")
+   -- Colors
+   Color_Blue = {0,0,255}
+   Color_Red = {255,0,0}
+   Color_Green = {0,255,0}
+   Color_Gray = {128,128,128}
 
-   -- Zone Colors
-   local Color_Blue = {0,0,255}
-   local Color_Red = {255,0,0}
-   local Color_Green = {0,255,0}
-   local Color_Gray = {128,128,128}
+-- Starting zones - Uncapturable	
+   BenGurionCapture = ZONE:New("Ben-Gurion"):DrawZone(-1, Color_Blue, 1, Color_Blue, .5, 1, true)
+	TelNofCapture = ZONE:New("Tel Nof"):DrawZone(-1, Color_Blue, 1, Color_Blue, .5, 1, true)
+
+-- List of capturable zones
+	SdeDovCapture = ZONE:New("Sde Dov"):DrawZone(-1, Color_Gray, 1, Color_Gray, .5, 1, true)
+   PalmahimCapture = ZONE:New("Palmahim"):DrawZone(-1, Color_Gray, 1, Color_Gray, .5, 1, true)
+   HatzorCapture = ZONE:New("Hatzor"):DrawZone(-1, Color_Gray, 1, Color_Gray, .5, 1, true)
 
    -- Zone Initialization
    -- Blue
-   BenGurionCoalition = ZONE_CAPTURE_COALITION:New( BenGurionCapture, coalition.side.BLUE):DrawZone(-1, Color_Blue, 1, Color_Blue, .5, 1, true):SetMarkZone( false ) -- Uncapturable
-   TelNofCoalition = ZONE_CAPTURE_COALITION:New( TelNofCapture, coalition.side.BLUE):DrawZone(-1, Color_Blue, 1, Color_Blue, .5, 1, true):SetMarkZone( false ) -- Uncapturable
+   BenGurionCoalition = ZONE_CAPTURE_COALITION:New( BenGurionCapture, coalition.side.BLUE):SetMarkZone( false ) -- Uncapturable
+   TelNofCoalition = ZONE_CAPTURE_COALITION:New( TelNofCapture, coalition.side.BLUE):SetMarkZone( false ) -- Uncapturable
 
    -- Red
-   SdeDovCoalition = ZONE_CAPTURE_COALITION:New( SdeDovCapture, coalition.side.RED):SetMarkZone( false ):DrawZone(-1, Color_Gray, 1, Color_Gray, .5, 1, true):Start() -- Empty and Capturable
-   PalmahimCoalition = ZONE_CAPTURE_COALITION:New( PalmahimCapture, coalition.side.RED):SetMarkZone( false ):DrawZone(-1, Color_Gray, 1, Color_Gray, .5, 1, true):Start() -- Empty and Capturable
-   HatzorCoalition = ZONE_CAPTURE_COALITION:New( HatzorCapture, coalition.side.RED):SetMarkZone( true ):DrawZone(-1, Color_Gray, 1, Color_Gray, .5, 1, true):Start() -- Guarded and Capturable
+   SdeDovCoalition = ZONE_CAPTURE_COALITION:New( SdeDovCapture, coalition.side.RED):SetMarkZone( false ):Start() -- Empty and Capturable
+   PalmahimCoalition = ZONE_CAPTURE_COALITION:New( PalmahimCapture, coalition.side.RED):SetMarkZone( false ):Start() -- Empty and Capturable
+   HatzorCoalition = ZONE_CAPTURE_COALITION:New( HatzorCapture, coalition.side.RED):SetMarkZone( true ):Start() -- Guarded and Capturable
 
 
    -- Command Center Initialization
@@ -239,16 +251,40 @@ my_ctld.useprecisecoordloads = true -- Instead if slightly varyiing the group po
    -- Events
 
    function SdeDovCoalition:OnEnterEmpty()
-      SdeDovCoalition:DrawZone(-1, Color_Gray, 1, Color_Gray, .5, 1, true)
-   
+      SdeDovCapture:Color( Color_Gray, 1):FillColor( Color_Gray, .5)
+
+   end
+
+   function SdeDovCoalition:OnEnterGuarded( From, Event, To )
+      if From ~= To then
+         local Coalition = self:GetCoalition()
+         self:E( { Coalition = Coalition } )
+         if Coalition == coalition.side.BLUE then
+            SdeDovCapture:UndrawZone():DrawZone(-1, Color_Blue, 1, Color_Blue, .5, 1, true)
+         else
+            SdeDovCapture:UndrawZone():DrawZone(-1, Color_Red, 1, Color_Red, .5, 1, true)
+         end
+      end
    end
 
    function PalmahimCoalition:OnEnterEmpty()
-      PalmahimCoalition:DrawZone(-1, Color_Gray, 1, Color_Gray, .5, 1, true)
+      PalmahimCapture:UndrawZone():DrawZone(-1, Color_Gray, 1, Color_Gray, .5, 1, true)
+   end
+
+   function PalmahimCoalition:OnEnterGuarded( From, Event, To )
+      if From ~= To then
+         local Coalition = self:GetCoalition()
+         self:E( { Coalition = Coalition } )
+         if Coalition == coalition.side.BLUE then
+            PalmahimCapture:UndrawZone():DrawZone(-1, Color_Blue, 1, Color_Blue, .5, 1, true)
+         else
+            PalmahimCapture:UndrawZone():DrawZone(-1, Color_Red, 1, Color_Red, .5, 1, true)
+         end
+      end
    end
 
    function HatzorCoalition:OnEnterEmpty()
-      HatzorCoalition:DrawZone(-1, Color_Gray, 1, Color_Gray, .5, 1, true)
+      HatzorCapture:UndrawZone():DrawZone(-1, Color_Gray, 1, Color_Gray, .5, 1, true)
    end
 
    function HatzorCoalition:OnEnterGuarded( From, Event, To )
@@ -256,9 +292,9 @@ my_ctld.useprecisecoordloads = true -- Instead if slightly varyiing the group po
          local Coalition = self:GetCoalition()
          self:E( { Coalition = Coalition } )
          if Coalition == coalition.side.BLUE then
-            HatzorCoalition:DrawZone(-1, Color_Blue, 1, Color_Blue, .5, 1, true)
+            HatzorCapture:UndrawZone():DrawZone(-1, Color_Blue, 1, Color_Blue, .5, 1, true)
          else
-            HatzorCoalition:DrawZone(-1, Color_Red, 1, Color_Red, .5, 1, true)
+            HatzorCapture:UndrawZone():DrawZone(-1, Color_Red, 1, Color_Red, .5, 1, true)
          end
       end
    end
