@@ -124,6 +124,7 @@ my_ctld:AddCratesCargo("82nd AB M939 (Supply)",{"82 M939"},CTLD_CARGO.Enum.VEHIC
 --  my_ctld:AddCratesCargo("Forward Ops Base",{"FOB"},CTLD_CARGO.Enum.FOB,4)
 
 -- 2nd MEF Troop Load Types
+--[[ COMMENTED OUT MEF
 my_ctld:AddTroopsCargo("2nd MEF Infantry Team",{"2 MEF IFT"},CTLD_CARGO.Enum.TROOPS,3,100)
 my_ctld:AddTroopsCargo("2nd MEF Infantry MG Team",{"2 MEF IFTH"},CTLD_CARGO.Enum.TROOPS,3,100)
 my_ctld:AddTroopsCargo("2nd MEF Anti-Tank Team",{"2 MEF IAT"},CTLD_CARGO.Enum.TROOPS,3,100)
@@ -136,6 +137,7 @@ my_ctld:AddCratesCargo("2nd MEF HMMWV TOW",{"2 MEF HMMWVT"},CTLD_CARGO.Enum.VEHI
 my_ctld:AddCratesCargo("2nd MEF Avenger",{"2 MEF Avenger"},CTLD_CARGO.Enum.VEHICLE,2,2700,-1,"2nd MEF")
 my_ctld:AddCratesCargo("2nd MEF AAV",{"2 MEF AAV"},CTLD_CARGO.Enum.VEHICLE,4,3500,-1,"2nd MEF")
 my_ctld:AddCratesCargo("2nd MEF M939 (Supply)",{"2 MEF M939"},CTLD_CARGO.Enum.VEHICLE,4,3500,-1,"2nd MEF")
+--]]
 
 -- Repairable Assets
 my_ctld:AddCratesRepair("Humvee Repair","Humvee",CTLD_CARGO.Enum.REPAIR,1)
@@ -219,6 +221,9 @@ my_ctld.useprecisecoordloads = true -- Instead if slightly varyiing the group po
 -- **********************************************************************************************************************************************************************************************************************************************************************
 -- BEGIN ZONE CAPTURE SCRIPT
 -- **********************************************************************************************************************************************************************************************************************************************************************
+   -- Zone Persistance WIP
+   --zone_status:Start()
+   --zone_status:__Load(5)
 
    -- Colors
    Color_Blue = {0,0,255}
@@ -226,9 +231,9 @@ my_ctld.useprecisecoordloads = true -- Instead if slightly varyiing the group po
    Color_Green = {0,255,0}
    Color_Gray = {128,128,128}
 
--- Starting zones - Uncapturable	
-   BenGurionCapture = ZONE:New("Ben-Gurion"):DrawZone(-1, Color_Blue, 1, Color_Blue, .5, 1, true)
-	TelNofCapture = ZONE:New("Tel Nof"):DrawZone(-1, Color_Blue, 1, Color_Blue, .5, 1, true)
+-- Starting zones - Uncapturable	Player and Support Base
+   BenGurionCapture = ZONE:New("Ben-Gurion"):DrawZone(-1, Color_Blue, 1, Color_Blue, .5, 1, true) -- Support Base
+	TelNofCapture = ZONE:New("Tel Nof"):DrawZone(-1, Color_Blue, 1, Color_Blue, .5, 1, true) -- Player Base
 
 -- List of capturable zones
 	SdeDovCapture = ZONE:New("Sde Dov"):DrawZone(-1, Color_Gray, 1, Color_Gray, .5, 1, true)
@@ -247,7 +252,7 @@ my_ctld.useprecisecoordloads = true -- Instead if slightly varyiing the group po
 
 
    -- Command Center Initialization
-
+ 
    -- Events
 
    function SdeDovCoalition:OnEnterEmpty()
@@ -299,7 +304,28 @@ my_ctld.useprecisecoordloads = true -- Instead if slightly varyiing the group po
       end
    end
 
-   
+
+   function Capture2Blue()
+      -- Create and draw second set of zones
+      KedemCapture = ZONE:New("Kedem"):DrawZone(-1, Color_Gray, 1, Color_Gray, .5, 1, true)
+      HatzerimCapture = ZONE:New("Hatzerim"):DrawZone(-1, Color_Gray, 1, Color_Gray, .5, 1, true)
+      NevatimCapture = ZONE:New("Nevatim"):DrawZone(-1, Color_Gray, 1, Color_Gray, .5, 1, true)
+
+      -- Stop monitoring first set of zones to reduce CPU load
+      SdeDovCoalition:SetCoalition(coalition.side.BLUE):Stop()
+      PalmahimCoalition:SetCoalition(coalition.side.BLUE):Stop()
+      HatzorCoalition:SetCoalition(coalition.side.BLUE):Stop()
+
+      -- Undraw zones
+      SdeDovCapture:UndrawZone()
+      PalmahimCapture:UndrawZone()
+      HatzorCapture:UndrawZone()
+
+      -- Initialize Zone Capture
+      KedemCoalition = ZONE_CAPTURE_COALITION:New( KedemCapture, coalition.side.RED):SetMarkZone( false ):Start()
+      HatzerimCoalition = ZONE_CAPTURE_COALITION:New( HatzerimCapture, coalition.side.RED):SetMarkZone( false ):Start()
+      NevatimCoalition = ZONE_CAPTURE_COALITION:New( NevatimCapture, coalition.side.RED):SetMarkZone( false ):Start()
+   end
 
 -- **********************************************************************************************************************************************************************************************************************************************************************
 -- END ZONE CAPTURE SCRIPT
@@ -344,6 +370,10 @@ my_ctld.useprecisecoordloads = true -- Instead if slightly varyiing the group po
 
 -- **********************************************************************************************************************************************************************************************************************************************************************
 -- END MOOSE ATIS
+-- **********************************************************************************************************************************************************************************************************************************************************************
+
+-- **********************************************************************************************************************************************************************************************************************************************************************
+-- MESSAGES
 -- **********************************************************************************************************************************************************************************************************************************************************************
 
 -- Script Test
